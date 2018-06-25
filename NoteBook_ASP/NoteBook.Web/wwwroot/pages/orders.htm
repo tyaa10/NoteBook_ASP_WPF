@@ -1,0 +1,297 @@
+﻿<div class="container-fluid">
+    <div class="row">
+        <div class="col-6" id="page-container"></div>
+        <div class="col-6">
+            <form id="form">
+                <div class="form-group">
+                    <label for="order-customer">Заказчик</label>
+                    <input class="form-control" type="text" id="order-customer" name="order-customer">
+                </div>
+                <div class="form-group">
+                    <label for="order-description">Описание заказа</label>
+                    <textarea class="form-control" id="order-description" name="order-description" rows="5"></textarea>
+                </div>
+                <input type="hidden" value="" id="order-id">
+                <button id="save" type="submit">Сохранить</button>
+                <button id="send" type="submit">Добавить</button>
+                <button id="del" type="submit">Удалить</button>
+               
+            </form>
+            <!--<form id="add">
+                <div class="form-group">
+                    <label for="order-customer">Заказчик</label>
+                    <input class="form-control" type="text" id="order-customers" name="order-customers">
+                </div>
+                <div class="form-group">
+                    <label for="order-description">Описание заказа</label>
+                    <textarea class="form-control" id="order-descriptions" name="order-descriptions" rows="5"></textarea>
+                    <textarea class="form-control" id="State.id" name="State.ids" rows="5"></textarea>
+                </div>
+                
+                
+                <input type="hidden" value="" id="order-id">
+                <button id="send" type="submit">Записать</button>
+                <button id="cancel" type="submit">Отмена</button>
+               
+
+            </form>-->
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+	app.handler(function() {
+
+		var $container = $(this).find("#page-container");
+
+		return function (params) {
+
+            //$('form').hide();
+            $('form#form').css("display", "none");
+
+			function populateTable() {
+				$.ajax({
+					type: 'POST',
+                    url: '/Default/DoAction?action=orders',
+					//contentType: 'text/plain',
+					cache: false
+			  	}).done(function(responseText, textStatus, jqXHR) {
+					  //if got code 200
+					  if(responseText !== '' && responseText !== 'error'){
+                          console.log(responseText);
+							//
+							//console.log(responseText.title);
+
+						  	var template = Hogan.compile(
+						  		'<table class="table">'
+								+  '<thead>'
+								+    '<tr>'
+								+      '<th>ID</th>'
+								+       '<th>Customer</th>'
+                                +       '<th>State</th>'
+								+    '</tr>'
+								+  '</thead>'
+								+  '<tbody>'
+					  			+ 		'{{#pagesData}}'
+			  					+ 			'<tr>'
+								+   			'<th scope="row">{{id}}</th>'
+								+               '<td>{{customer_name}}</td>'
+                                +               '<td>{{State.name}}</td>'
+                                +               '</tr>'
+					      		+               '{{/pagesData}}'
+                                +	'</tbody>'
+								+ '</table>'
+                                + '<button id="add" type="submit">Добавить</button>'
+						  		);
+							//
+						  	$container.html(template.render(responseText));
+
+					        //При помощи $ находим ячейки ИД и устанавливаем им обработчики клика
+						  	$('tbody th').click(function(event){
+
+								//Блокируем отправку формы
+						  	    event.preventDefault();
+
+						  	    $('button#send').hide();
+						  	    $('button#save').show();
+
+						  	    //Асинхронно запрашиваем у контроллера Default информацию об одном заказе
+								$.ajax({
+									type: 'POST',
+									url: '/Default/DoAction?action=order&id=' + $(event.target).text(),
+									//contentType: 'text/plain',
+									cache: false
+							  	}).done(function(responseText, textStatus, jqXHR) {
+									  //if got code 200
+									  if(responseText !== '' && responseText !== 'error'){
+
+											//
+											//console.log(responseText.title);
+
+										  	$('#order-id').val(responseText.id);
+										  	$('#order-customer').val(responseText.cust);
+										  	$('#order-description').val(responseText.descr);
+
+										  	$('form#form').fadeIn(600);
+									  } else {
+
+									  	alert("Произошла ошибка. Обратитесь к разработчику сайта");
+									  }
+									  //stopLoadingAnimation();
+									  $(".loader").css("display", "none");
+							  	}).fail(function(jqXHR, textStatus, errorThrown) {
+
+									//if got code 404 or 500, etc.
+									//stopLoadingAnimation();
+									$(".loader").css("display", "none");
+									// alert("Произошла ошибка. Обратитесь к разработчику сайта");
+							  	});
+						  	});
+					      /////////////////////////////////////////////////////////////////////////////////////////////////////////
+						  	$('button#add').click(function (event) {
+						  	    //Блокируем отправку формы
+						  	    event.preventDefault();
+						  	    $('#order-id').val("");
+						  	    $('button#add').hide();
+						  	    $('button#save').hide();
+						  	    $('button#send').show();
+						  	    $('form#form').fadeIn(600);
+						  	});
+                          ////////////////////////////////////////////////////////////////////////////////////////////////////////
+					      //Обрабатываем клик по кнопке Сохранить на форме
+						  	$('button#save').unbind("click");
+						  	$('button#save').click(function(event){
+
+								//
+								event.preventDefault();
+						  	    //
+								var urlString;
+
+								    console.log("edit");
+
+								    urlString = '/Default/DoAction?action=order-edit&id='
+									    + $('#order-id').val()
+									    + '&order-customer='
+									    + encodeURIComponent($('#order-customer').val())
+									    + '&order-description='
+									    + encodeURIComponent($('#order-description').val());
+
+								$.ajax({
+									type: 'POST',
+									url: urlString,
+									//contentType: 'text/plain',
+									cache: false
+							  	}).done(function(responseText, textStatus, jqXHR) {
+									  //if got code 200
+									  if(responseText !== '' && responseText !== 'error'){
+
+											//
+											console.log(responseText);
+											$('form#form').fadeOut(600);
+											//
+		  									populateTable();
+									  } else {
+
+										  //
+										  alert("Произошла ошибка. Обратитесь к разработчику сайта");
+									  }
+									  //stopLoadingAnimation();
+									  $(".loader").css("display", "none");
+							  	}).fail(function(jqXHR, textStatus, errorThrown) {
+
+									//if got code 404 or 500, etc.
+									//stopLoadingAnimation();
+									$(".loader").css("display", "none");
+									// alert("Произошла ошибка. Обратитесь к разработчику сайта");
+							  	});
+						  	});
+					      ////////////////////////////////////////////////////////////////////
+					      //Обрабатываем клик по кнопке Добавить на форме
+						  	$('button#send').unbind("click");
+						  	$('button#send').click(function (event) {
+
+						  	    //
+						  	    event.preventDefault();
+						  	    //
+						  	    var urlString;
+						  	    
+
+						  	    console.log("create");
+
+						  	    urlString = '/Default/DoAction?action=order-add'
+									+ '&order-customer='
+									+ encodeURIComponent($('#order-customer').val())
+									+ '&order-description='
+									+ encodeURIComponent($('#order-description').val());
+
+						  	    $.ajax({
+						  	        type: 'POST',
+						  	        url: urlString,
+						  	        //contentType: 'text/plain',
+						  	        cache: false
+						  	    }).done(function (responseText, textStatus, jqXHR) {
+						  	        //if got code 200
+						  	        if (responseText !== '' && responseText !== 'error') {
+
+						  	            //
+						  	            console.log(responseText);
+						  	            $('form#form').fadeOut(600);
+						  	            //
+						  	            populateTable();
+						  	        } else {
+
+						  	            //
+						  	            alert("Произошла ошибка. Обратитесь к разработчику сайта");
+						  	        }
+						  	        //stopLoadingAnimation();
+						  	        $(".loader").css("display", "none");
+						  	    }).fail(function (jqXHR, textStatus, errorThrown) {
+
+						  	        //if got code 404 or 500, etc.
+						  	        //stopLoadingAnimation();
+						  	        $(".loader").css("display", "none");
+						  	        // alert("Произошла ошибка. Обратитесь к разработчику сайта");
+						  	    });
+						  	});
+					      //////////////////////////////////////////////////////////////////
+						  	$('button#cancel').click(function (event) {
+						  	    
+						  	       
+						  	
+						  	});
+                         //////////////////////////////////////////////////////////////////
+						  	$('button#del').unbind("click");
+						  	$('button#del').on('click', (function (event) {
+						  	  
+						  	    event.preventDefault();
+						  	 
+						  	    $.ajax({
+						  	        type: 'POST',
+						  	        url: '/Default/DoAction?action=order-del&id='
+									+ $('#order-id').val(),
+						  	        contentType: 'text/plain',
+						  	        cache: false
+						  	    }).done(function(responseText, textStatus, jqXHR) {
+						  	        //if got code 200
+						  	        //if(responseText !== '' && responseText !== 'error'){
+
+						  	            
+						  	            console.log(responseText);
+						  	            $('form#form').fadeOut(600);
+						  	            //
+						  	            populateTable();
+						  	       // } else {
+
+						  	            
+						  	           // alert("Произошла ошибка. Обратитесь к разработчику сайта");
+						  	       // }
+						  	        //stopLoadingAnimation();
+						  	        $(".loader").css("display", "none");
+						  	    }).fail(function(jqXHR, textStatus, errorThrown) {
+
+						  	        //if got code 404 or 500, etc.
+						  	        //stopLoadingAnimation();
+						  	        $(".loader").css("display", "none");
+						  	        // alert("Произошла ошибка. Обратитесь к разработчику сайта");
+						  	    });
+						  	
+						  	   
+					      	}));
+					  } else {
+
+					  	alert("Произошла ошибка. Обратитесь к разработчику сайта");
+					  }
+					  //stopLoadingAnimation();
+					  $(".loader").css("display", "none");
+			  	}).fail(function(jqXHR, textStatus, errorThrown) {
+
+					//if got code 404 or 500, etc.
+					//stopLoadingAnimation();
+					$(".loader").css("display", "none");
+					// alert("Произошла ошибка. Обратитесь к разработчику сайта");
+			  	});
+		  	}
+		  	//
+		  	populateTable();
+	  	};
+  	});
+</script>

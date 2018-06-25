@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NoteBook.Domain", "NoteBook.Domain\NoteBook.Domain.csproj", "{0759902B-FC35-435C-A6A9-7B3E877165F2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NoteBook.Web", "NoteBook.Web\NoteBook.Web.csproj", "{25253293-434E-4A63-ADD1-50E7B054055D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{0759902B-FC35-435C-A6A9-7B3E877165F2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0759902B-FC35-435C-A6A9-7B3E877165F2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0759902B-FC35-435C-A6A9-7B3E877165F2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0759902B-FC35-435C-A6A9-7B3E877165F2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{25253293-434E-4A63-ADD1-50E7B054055D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{25253293-434E-4A63-ADD1-50E7B054055D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{25253293-434E-4A63-ADD1-50E7B054055D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{25253293-434E-4A63-ADD1-50E7B054055D}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,88 @@
+﻿<div class="container-fluid">
+    <div class="row">
+        <div class="col-6" id="page-container"></div>
+        <div class="col-6">
+            <form id="authForm">
+                <div class="form-group">
+                    <label for="login">Login</label>
+                    <input class="form-control" type="text" id="login" name="login">
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input class="form-control" type="text" id="password" name="password">
+                </div>
+                <button id="signIn" type="submit">Sign in</button>
+                <button id="signUp" type="submit">Sign Up</button>
+                </form>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    app.handler(function (params) {
+
+        var $container = $(this).find("#page-container");
+
+        return function (params) {
+
+            checkAuth("", "");
+            //console.log(params);
+            if (params == "registration") {
+
+                $('form button#signIn').hide();
+                $('form button#signUp').show();
+            } else {
+
+                $('form button#signUp').hide();
+                $('form button#signIn').show();
+            }
+		    $('form button#signIn').click(function (event) {
+               
+		        //
+		        event.preventDefault();
+                
+		        //url: 'http://localhost:49245/api/auth',
+                checkAuth(
+                    encodeURIComponent($('#login').val())
+                    , encodeURIComponent($('#password').val())
+                );
+            });
+            ///////
+            $('form button#signUp').click(function (event) {
+
+                //
+                event.preventDefault();
+                
+                //url: 'http://localhost:49245/api/auth',
+                
+                //var dataJSON = {
+                //    actionType: "REG"
+                //    ,  login: encodeURIComponent($('#login').val())
+                //    , password: encodeURIComponent($('#password').val())
+                //};
+                var urlString;
+                urlString = '/Default/DoAction?action=login-add'
+                    + '&login='
+                    + encodeURIComponent($('#login').val())
+                    + '&password='
+                    + encodeURIComponent($('#password').val());
+
+                $.ajax({
+                    type: 'POST',
+                    url: urlString,
+                    cache: false
+                }).done(function (responseText, textStatus, jqXHR) {
+
+                    console.log(responseText.signed);
+                    checkAuth(
+                        encodeURIComponent($('#login').val())
+                        , encodeURIComponent($('#password').val())
+                    );
+                });
+            });
+                
+            ///////
+            
+            $(".loader").css("display", "none");
+	  	};
+  	});
+</script>

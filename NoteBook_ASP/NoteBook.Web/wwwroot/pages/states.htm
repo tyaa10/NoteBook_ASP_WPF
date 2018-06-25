@@ -1,0 +1,232 @@
+﻿<div class="container-fluid">
+    <div class="row">
+        <div class="col-6" id="page-container"></div>
+        <div class="col-6">
+            <form id="addfor">
+                <div class="form">
+                    <label for="name">Исполнитель</label>
+                    <input class="form-control" type="text" id="name" name="name">
+                </div>
+                
+                <input type="hidden" value="" id="id">
+                <button id="saveState" type="submit">Сохранить</button>
+                
+
+            </form>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    app.handler(function () {
+
+        var $container = $(this).find("#page-container");
+
+        return function (params) {
+
+            $('#addfor').hide();
+
+            function populateTable() {
+                $.ajax({
+                    type: 'POST',
+                    url: '/Default/DoAction?action=states',
+                    //contentType: 'text/plain',
+                    cache: false
+                }).done(function (responseText, textStatus, jqXHR) {
+                    //if got code 200
+                    if (responseText !== '' && responseText !== 'error') {
+                        console.log(responseText);
+                        //
+                        //console.log(responseText.title);
+
+                        var template = Hogan.compile(
+                            '<table class="table">'
+                            + '<thead>'
+                            + '<tr>'
+                            + '<th>ID</th>'
+                            + '<th>Name</th>'
+                            + '<th></th>'
+                            +    '</tr>'
+                            + '</thead>'
+                            + '<tbody>'
+                            + '{{#pagesData}}'
+                            + '<tr>'
+                            + '<th scope="row">{{id}}</th>'
+                            + '<td>{{name}}</td>'
+                            + '<td><input type="checkbox" id="{{id}}"></td>'
+                            + '</tr>'
+                            + '{{/pagesData}}'
+                            + '</tbody>'
+                            + '</table>'
+                            + '<button id="add" type="submit">Добавить</button>'
+                            + '<button id="delstate" type ="submit">Удалить</buttor>'
+                           
+                        );
+                        //
+                        $container.html(template.render(responseText));
+
+                        //Select row
+                        /*$('table tr').unbind("click");
+                        $('table tr:not(:first)').click(function (event) {
+                            //Блокируем отправку формы
+                            event.preventDefault();
+                            $(this).find('th:nth-child(1)');
+                            console.log($(this).find('th:nth-child(1)').text());
+                        });*/
+
+                        $('button#delstate').unbind("click");
+                        $('button#delstate').click(function (event) {
+                            //Блокируем отправку формы
+                            event.preventDefault();
+
+                            var checked = $('table tr:not(:first) input:checked')
+                                .map(function () {
+                                    return this.id;
+                                })
+                                .get();
+                            console.log(checked);
+                            $.ajax({
+                                type: 'POST',
+                                url: '/Default/DoActionModel?action=state-del',
+                                contentType: 'application/json; charset=utf-8',
+                                dataType: "json",
+                                data: JSON.stringify({ states: checked }),
+                                cache: false
+                            }).done(function (responseText, textStatus, jqXHR) {
+                                //if got code 200
+                                if (responseText !== '' && responseText !== 'error') {
+
+                                    console.log(responseText);
+                                    populateTable();
+                                    } else {
+
+                                        alert("Произошла ошибка. Обратитесь к разработчику сайта");
+                                    }
+                                    //stopLoadingAnimation();
+                                    $(".loader").css("display", "none");
+                                }).fail(function (jqXHR, textStatus, errorThrown) {
+
+                                    //if got code 404 or 500, etc.
+                                    //stopLoadingAnimation();
+                                    $(".loader").css("display", "none");
+                                    // alert("Произошла ошибка. Обратитесь к разработчику сайта");
+                                });
+                        });
+
+                        //При помощи $ находим ячейки ИД и устанавливаем им обработчики клика
+                        
+                       
+                        /////////////////////////////////////////////////////////////////////////////////////////////////////////
+                        $('button#add').click(function (event) {
+                            //Блокируем отправку формы
+                            event.preventDefault();
+                            $('button#add').hide();
+                            $('#addfor').fadeIn(600);
+                        });
+                        ////////////////////////////////////////////////////////////////////////////////////////////////////////
+                        //Обрабатываем клик по кнопке Сохранить на форме
+                        $('button#saveState').unbind("click");
+                        $('button#saveState').click(function (event) {
+
+                            //
+                            event.preventDefault();
+                            //
+                            var urlString;
+
+                            console.log("edit");
+
+                            urlString = '/Default/DoAction?action=state-add'
+
+                                + '&name='
+                                + encodeURIComponent($('#name').val());
+
+
+                            $.ajax({
+                                type: 'POST',
+                                url: urlString,
+                                //contentType: 'text/plain',
+                                cache: false
+                            }).done(function (responseText, textStatus, jqXHR) {
+                                //if got code 200
+                                if (responseText !== '' && responseText !== 'error') {
+
+                                    //
+                                    console.log(responseText);
+                                    $('form').fadeOut(600);
+                                    //
+                                    populateTable();
+                                } else {
+
+                                    //
+                                    alert("Произошла ошибка. Обратитесь к разработчику сайта");
+                                }
+                                //stopLoadingAnimation();
+                                $(".loader").css("display", "none");
+                            }).fail(function (jqXHR, textStatus, errorThrown) {
+
+                                //if got code 404 or 500, etc.
+                                //stopLoadingAnimation();
+                                $(".loader").css("display", "none");
+                                // alert("Произошла ошибка. Обратитесь к разработчику сайта");
+                            });
+                        });
+                        ////////////////////////////////////////////////////////////////////
+                        
+                        //////////////////////////////////////////////////////////////////
+                       
+                        //////////////////////////////////////////////////////////////////
+                        //$('button#del').unbind("click");
+                        //$('button#del').on('click', (function (event) {
+
+                        //    event.preventDefault();
+
+                        //    $.ajax({
+                        //        type: 'POST',
+                        //        url: '/Default/DoAction?action=order-del&id='
+                        //        + $('#order-id').val(),
+                        //        contentType: 'text/plain',
+                        //        cache: false
+                        //    }).done(function (responseText, textStatus, jqXHR) {
+                        //        //if got code 200
+                        //        //if(responseText !== '' && responseText !== 'error'){
+
+
+                        //        console.log(responseText);
+                        //        $('form').fadeOut(600);
+                        //        //
+                        //        populateTable();
+                        //        // } else {
+
+
+                        //        // alert("Произошла ошибка. Обратитесь к разработчику сайта");
+                        //        // }
+                        //        //stopLoadingAnimation();
+                        //        $(".loader").css("display", "none");
+                        //    }).fail(function (jqXHR, textStatus, errorThrown) {
+
+                        //        //if got code 404 or 500, etc.
+                        //        //stopLoadingAnimation();
+                        //        $(".loader").css("display", "none");
+                        //        // alert("Произошла ошибка. Обратитесь к разработчику сайта");
+                        //    });
+
+
+                        //}));
+                    } else {
+
+                        alert("Произошла ошибка. Обратитесь к разработчику сайта");
+                    }
+                    //stopLoadingAnimation();
+                    $(".loader").css("display", "none");
+                }).fail(function (jqXHR, textStatus, errorThrown) {
+
+                    //if got code 404 or 500, etc.
+                    //stopLoadingAnimation();
+                    $(".loader").css("display", "none");
+                    // alert("Произошла ошибка. Обратитесь к разработчику сайта");
+                });
+            }
+            //
+            populateTable();
+        };
+    });
+</script>
